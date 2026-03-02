@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build folders
+bin/
+obj/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Local app settings
+appsettings.Development.json
+appsettings.Local.json
+appsettings.json

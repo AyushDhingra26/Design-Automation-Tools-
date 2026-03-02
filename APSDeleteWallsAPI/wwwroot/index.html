@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title>INTEC Infra | Design Automation Tools</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/css/jstree.style.min.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!--type="text/css">-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script language="JavaScript" src="/js/jquery.min.js"></script>
+    <script language="JavaScript" src="/js/jquery.storageapi.min.js"></script>
+    <script src="/js/jstree.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- for the viewer -->
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/three.min.js?v=v4.2"></script>
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/viewer3D.js?v=v4.2"></script>
+    <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/style.css?v=v4.2" />
+    <link rel="stylesheet" href="/css/index.css" />
+    <style>
+        /* Toast container + toast styles */
+        #toast-container {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toastx {
+            min-width: 280px;
+            max-width: 420px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+            font-family: Arial, sans-serif;
+            pointer-events: auto;
+            opacity: 0.98;
+        }
+
+            .toastx .title {
+                font-weight: 700;
+                margin-bottom: 4px;
+            }
+
+            .toastx .msg {
+                font-size: 13px;
+                line-height: 1.25;
+            }
+
+            .toastx.info {
+                background: #0d6efd;
+            }
+
+            .toastx.success {
+                background: #198754;
+            }
+
+            .toastx.warn {
+                background: #ffc107;
+                color: #222;
+            }
+
+            .toastx.error {
+                background: #dc3545;
+            }
+
+            .toastx .bar {
+                height: 4px;
+                background: rgba(255,255,255,0.25);
+                border-radius: 3px;
+                overflow: hidden;
+                margin-top: 8px;
+            }
+
+                .toastx .bar > i {
+                    display: block;
+                    height: 100%;
+                    width: 0%;
+                    background: rgba(255,255,255,0.85);
+                    transition: width .35s linear;
+                }
+    </style>
+    <script language="JavaScript" src="/js/scripts.js"></script>
+</head>
+
+<body>
+    <div class="container pt-3">
+        <div class="jumbotron">
+            <div class="top-surface">
+
+                <!-- INTEC Header -->
+                <div class="company-header">
+                    <div class="logo-container">
+                        <img src="/img/intec-logo.png" alt="INTEC Infra" class="company-logo" />
+                    </div>
+                    <div class="title-container">
+                        <h2 class="main-title">Design Automation Tools</h2>
+                        <p class="sub-title">Powered by INTEC Infra</p>
+                    </div>
+                </div>
+
+                <!-- Login row (IDs unchanged, backend safe) -->
+                <!-- Login row (IDs unchanged, backend safe) -->
+                <div class="row login-row" id="loginRow">
+                    <div class="col-sm-4">
+                        <input id="client_id" type="text" name="username" placeholder="Client ID"
+                               class="input-small form-control" />
+                    </div>
+                    <div class="col-sm-4">
+                        <input id="client_secret" type="password" name="password" placeholder="Client Secret"
+                               class="input-small form-control" />
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="#" id="authenticate" class="btn btn-warning btn-block btn-login">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Log In
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Logged-in message (hidden by default) -->
+                <div class="row" id="loggedInRow" style="display:none;">
+                    <div class="col-sm-12">
+                        <a href="#" class="btn btn-success btn-block" style="pointer-events:none;">
+                            ✅ You’re logged in — credentials hidden for security
+                        </a>
+                    </div>
+                </div> <!-- top-surface -->
+                <!--
+                <div class="row">&nbsp;</div>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div id="progressInfo" class="btn btn-info btn-block">
+                            <span id="progressInfoText">Progress info</span>
+                            <span id="progressInfoIcon"></span>
+                        </div>
+                    </div>
+                </div>
+                -->
+
+                <div class="row">&nbsp;</div>
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-sm-6">
+                        <input id="bucketName" class="form-control"
+                               placeholder="Bucket Key (example: ayush-revit-bucket)" />
+                    </div>
+
+                    <div class="col-sm-3">
+                        <select id="bucketType" class="form-control">
+                            <option value="transient">transient</option>
+                            <option value="temporary">temporary</option>
+                            <option value="persistent">persistent</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <a id="createBucket" class="btn btn-primary btn-block">
+                            Create Bucket
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">&nbsp;</div>
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <ul class="nav nav-tabs" id="pills-tab" role="tablist">
+                            <li class="nav-item active">
+                                <a class="nav-link active" id="pills-appbundles-tab" data-toggle="pill" href="#pills-appbundles"
+                                   role="tab" aria-controls="pills-appbundles" aria-selected="true">AppBundles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-activities-tab" data-toggle="pill" href="#pills-activities"
+                                   role="tab" aria-controls="pills-activities" aria-selected="false">Activities</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-workitems-tab" data-toggle="pill" href="#pills-workitems"
+                                   role="tab" aria-controls="pills-workitems" aria-selected="false">WorkItems</a>
+                            </li>
+                        </ul>
+                        <div class="row">
+                            <div class="tab-content" id="pills-tabAppBundles">
+                                <div class="tab-pane active in" id="pills-appbundles" role="tabpanel" aria-labelledby="pills-appbundles-tab">
+                                    <div class="col-sm-4">
+                                        <div id="appbundlesTree" class="form-control">
+
+                                        </div>
+                                        <a id="appbundlesTree_refresh" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Refresh tree">
+                                            <span class="glyphicon glyphicon-refresh"></span>
+                                        </a>
+                                        <a id="appbundlesTree_add" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Create item">
+                                            <span class="glyphicon glyphicon-plus"></span>
+                                        </a>
+                                        <a id="appbundlesTree_delete" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Delete item">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </a>
+                                    </div>
+
+                                    <div class="col-sm-8">
+                                        <textarea id="appbundlesInfo" class="form-control" rows="3"></textarea>
+                                        <!--
+                                            <a id="appbundlesInfo_paste" style="display: inline-block; margin-top: 5px;" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-paste"></span>
+                                            </a>
+                                        -->
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="pills-activities" role="tabpanel" aria-labelledby="pills-activities-tab">
+                                    <div class="col-sm-4">
+                                        <div id="activitiesTree" class="form-control">
+
+                                        </div>
+                                        <a id="activitiesTree_refresh" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Refresh tree">
+                                            <span class="glyphicon glyphicon-refresh"></span>
+                                        </a>
+                                        <a id="activitiesTree_add" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Create item">
+                                            <span class="glyphicon glyphicon-plus"></span>
+                                        </a>
+                                        <a id="activitiesTree_delete" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Delete item">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </a>
+                                    </div>
+
+                                    <div class="col-sm-8">
+                                        <textarea id="activitiesInfo" class="form-control" rows="3"></textarea>
+                                        <!--
+                                            <a id="activitiesInfo_paste" style="display: inline-block; margin-top: 5px;" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-paste"></span>
+                                            </a>
+                                        -->
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="pills-workitems" role="tabpanel" aria-labelledby="pills-workitems-tab">
+                                    <div class="col-sm-4">
+                                        <div id="workitemsTree" class="form-control">
+
+                                        </div>
+                                        <!--
+                                            <a id="workitemsTree_refresh" style="display: inline-block; margin-top: 5px;"
+                                            class="btn btn-default">
+                                                <span class="glyphicon glyphicon-refresh"></span>
+                                            </a>
+                                            <a id="workitemsTree_add" style="display: inline-block; margin-top: 5px;" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </a>
+                                        -->
+                                        <div id="chartCanvasContainer" class="form-control">
+                                            <canvas id="chartCanvas"></canvas>
+                                            <div id="copyChartData" title="Copy chart data to clipboard">
+                                                <span class="glyphicon glyphicon-copy"></span>
+                                            </div>
+                                        </div>
+
+                                        <a id="workitemsTree_add" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Add WorkItem">
+                                            <span class="glyphicon glyphicon-plus"></span>
+                                        </a>
+
+                                        <a id="workitemsTree_stop" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Stop WorkItem">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                        </a>
+                                        <a id="workitemsTree_delete" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Delete WorkItem">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </a>
+                                        <a id="workitemsTree_showReport" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Show report">
+                                            <span class="glyphicon glyphicon-book"></span>
+                                        </a>
+                                        <a id="uploadFile" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-default" title="Upload RVT file">
+                                            <span class="glyphicon glyphicon-upload"></span>
+                                        </a>
+                                        <a id="workitemsRun_auto" style="display: inline-block; margin-top: 5px;"
+                                           class="btn btn-primary" title="Run WorkItem automatically">
+                                            <span class="glyphicon glyphicon-play"></span> Run (Auto)
+                                        </a>
+                                        <!-- Download processed result link -->
+                                        <div style="margin-top:10px;">
+                                            <a id="downloadLink" href="#" target="_blank" style="display:none; font-weight:600;">
+                                                ⬇ Download processed file (result.rvt)
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-8">
+                                        <textarea id="workitemsInfo" class="form-control" rows="3"></textarea>
+                                        <!--
+                                            <a id="workitemsInfo_paste" style="display: inline-block; margin-top: 5px;" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-paste"></span>
+                                            </a>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- row -->
+            </div> <!-- jumbotron -->
+        </div>
+
+        <!-- Modal Dialog for getting info -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 id="myModal_title" class="modal-title">Modal Header</h4>
+                    </div>
+                    <div id="myModal_body" class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="myModal_Create">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- jumbotron -->
+    </div>
+
+    <!-- Modal Dialog -->
+    <div class="modal fade" id="myModal" role="dialog">
+        ...
+    </div>
+
+    <input id="apsUploadHidden" type="file" accept=".rvt" style="display:none;" />
+    <!-- Toast container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+
+</body>
+
+</html>
